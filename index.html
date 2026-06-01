@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notion Champion Quiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+      --text-3xl: clamp(2.5rem, 1rem + 4vw, 5rem);
+      
+      --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+      --font-body: 'Inter', Arial, sans-serif;
+      
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      
+      --radius-sm: 0.45rem;
+      --radius-md: 0.8rem;
+      --radius-lg: 1.25rem;
+      --radius-xl: 1.8rem;
+      --radius-full: 999px;
+      
+      --gold: #ffd64c;
+      --gold-2: #ffb703;
+      --blue-1: #0d57d5;
+      --blue-2: #12399d;
+      --blue-3: #061946;
+      --blue-4: #4db5ff;
+      --panel: rgba(8, 39, 117, 0.92);
+      --panel-light: rgba(35, 95, 214, 0.9);
+      --surface: rgba(4, 22, 68, 0.72);
+      --surface-2: rgba(7, 32, 92, 0.78);
+      --text: #eff6ff;
+      --muted: #b6d4ff;
+      --line: rgba(255, 255, 255, 0.18);
+      --success: #72ff93;
+      --danger: #ff8ca8;
+      
+      --shadow: 0 16px 40px rgba(2, 8, 30, 0.42);
+      --transition: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(126, 198, 255, 0.55), transparent 18%),
+        radial-gradient(circle at 80% 12%, rgba(175, 118, 255, 0.45), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(0, 122, 255, 0.35), transparent 28%),
+        linear-gradient(180deg, #5eb3ff 0%, #2851c7 22%, #0b1e63 66%, #07153d 100%);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(115deg, rgba(255,255,255,0.04) 0 18px, transparent 18px 36px),
+        radial-gradient(circle at 20% 30%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
+        radial-gradient(circle at 72% 26%, rgba(255,255,255,0.16) 0 1px, transparent 2px),
+        radial-gradient(circle at 55% 82%, rgba(255,255,255,0.16) 0 1px, transparent 2px);
+      pointer-events: none;
+      opacity: 0.75;
+    }
+
+    button, input { font: inherit; }
+    button {
+      border: 0;
+      cursor: pointer;
+      color: inherit;
+    }
+
+    .app {
+      position: relative;
+      min-height: 100vh;
+      padding: var(--space-4);
+      display: grid;
+      place-items: center;
+    }
+
+    .tv-shell {
+      width: min(1440px, 100%);
+      height: calc(100vh - 2rem);
+      border-radius: 2rem;
+      border: 6px solid rgba(255, 214, 76, 0.85);
+      box-shadow: 0 0 0 4px rgba(255,255,255,0.28), 0 24px 80px rgba(1, 7, 32, 0.5);
+      background: linear-gradient(180deg, rgba(9, 32, 99, 0.55), rgba(4, 17, 60, 0.72));
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: clamp(1rem, 2vw, 1.4rem);
+      display: none;
+      opacity: 0;
+      transform: scale(1.03);
+    }
+    .screen.active { display: flex; }
+    
+    .screen.enter {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1), transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .screen.exit {
+      opacity: 0;
+      transform: scale(0.97);
+      transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1), transform 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .loading-screen,
+    .finish-screen,
+    .setup-screen,
+    .countdown-screen {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .logo-row {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.18);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: var(--text-sm);
+    }
+
+    .logo-mark {
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, var(--gold), #fff3b0, var(--gold-2), var(--gold));
+      position: relative;
+      box-shadow: 0 0 20px rgba(255, 214, 76, 0.4);
+    }
+
+    .logo-mark::after {
+      content: '?';
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: #0a246f;
+      font-weight: 800;
+    }
+
+    .hero-title,
+    .count-value,
+    .finish-title {
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      line-height: 0.95;
+      letter-spacing: 0.03em;
+      margin: 0;
+    }
+
+    .hero-title { font-size: clamp(3rem, 10vw, 7.5rem); max-width: 12ch; }
+    .hero-subtitle { max-width: 42rem; margin: 0 auto; color: var(--muted); }
+
+    .primary-btn,
+    .secondary-btn,
+    .icon-tile,
+    .team-count-btn,
+    .answer-card,
+    .mini-btn {
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition), border-color var(--transition), opacity var(--transition);
+    }
+
+    .primary-btn:hover,
+    .secondary-btn:hover,
+    .icon-tile:hover,
+    .team-count-btn:hover,
+    .answer-card:hover,
+    .mini-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .primary-btn {
+      background: linear-gradient(180deg, #ffe580, #ffc933);
+      color: #09215f;
+      padding: 0.9rem 1.35rem;
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(255, 199, 47, 0.28);
+    }
+
+    .secondary-btn, .mini-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius-full);
+    }
+
+    .mini-btn { padding: 0.55rem 0.9rem; font-size: var(--text-sm); }
+
+    .setup-panel {
+      width: min(1040px, 100%);
+      background: rgba(3, 19, 66, 0.68);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 1.8rem;
+      padding: clamp(1rem, 2vw, 1.8rem);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: var(--space-6);
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .setup-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.4rem;
+      padding: var(--space-5);
+    }
+
+    .setup-card h2, .setup-card h3 {
+      margin: 0 0 var(--space-3);
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .count-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .team-count-btn {
+      background: linear-gradient(180deg, rgba(59,130,246,0.82), rgba(16,60,170,0.92));
+      border: 2px solid transparent;
+      border-radius: 1rem;
+      padding: 0.9rem;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .team-count-btn.active {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(255,214,76,0.2), 0 10px 24px rgba(5, 13, 42, 0.4);
+    }
+
+    .team-forms {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .team-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-4);
+      align-items: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.2rem;
+      padding: var(--space-4);
+    }
+
+    .team-form.hidden { display: none; }
+
+    .field {
+      display: grid;
+      gap: 0.45rem;
+      text-align: left;
+    }
+
+    .field label {
+      font-size: var(--text-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    .field input {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text);
+      border-radius: 0.85rem;
+      padding: 0.9rem 1rem;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(255, 214, 76, 0.18);
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.55rem;
+      max-width: 380px;
+    }
+
+    .icon-tile {
+      height: 58px;
+      width: 100%;
+      border-radius: 0.95rem;
+      border: 2px solid transparent;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-size: 1.7rem;
+    }
+
+    .icon-tile.selected {
+      border-color: var(--gold);
+      background: rgba(255, 214, 76, 0.15);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    .count-value {
+      font-size: clamp(5rem, 18vw, 11rem);
+      text-shadow: 0 0 30px rgba(255,255,255,0.28);
+    }
+
+    .animate-shake {
+      animation: shakePop 0.8s ease both;
+    }
+
+    .count-go {
+      color: #fff6a5;
+      position: relative;
+    }
+
+    .star {
+      position: absolute;
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      color: #fff4a8;
+      animation: burst 700ms ease both;
+      z-index: 1;
+    }
+
+    @keyframes shakePop {
+      0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+      25% { transform: scale(1.05) rotate(7deg); }
+      50% { transform: scale(0.96) rotate(-6deg); }
+      75% { transform: scale(1.03) rotate(4deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes burst {
+      0% { transform: scale(0.2); opacity: 0; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.7; }
+    }
+
+    .game-screen {
+      display: none;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .game-screen.active { display: flex; }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-4);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 1.3rem;
+      padding: 0.85rem 1rem;
+    }
+
+    .top-meta {
+      display: flex;
+      gap: var(--space-4);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: rgba(255,255,255,0.08);
+      padding: 0.45rem 0.8rem;
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .game-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+      gap: var(--space-4);
+    }
+
+    .quiz-panel,
+    .race-panel {
+      background: linear-gradient(180deg, rgba(17, 74, 201, 0.82), rgba(6, 26, 82, 0.94));
+      border-radius: 1.6rem;
+      border: 3px solid rgba(255, 214, 76, 0.88);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .quiz-panel::before,
+    .race-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 22%);
+      pointer-events: none;
+    }
+
+    .quiz-inner {
+      height: 100%;
+      padding: clamp(1rem, 2vw, 1.4rem);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: var(--space-4);
+      min-height: 0;
+    }
+
+    .question-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: var(--space-4);
+    }
+
+    .question-title {
+      margin: 0;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      line-height: 1.06;
+      font-family: var(--font-display);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      max-width: 18ch;
+    }
+
+    .timer-ring {
+      width: 104px;
+      min-width: 104px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      border-radius: 50%;
+      background: conic-gradient(var(--gold) calc(var(--progress) * 1%), rgba(255,255,255,0.14) 0);
+      box-shadow: inset 0 0 0 10px rgba(5, 21, 64, 0.95), 0 0 24px rgba(255, 214, 76, 0.22);
+    }
+
+    .timer-ring::after {
+      content: '';
+      position: absolute;
+      inset: 13px;
+      background: radial-gradient(circle at 40% 35%, rgba(126,198,255,0.3), rgba(5,21,64,0.92));
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .timer-ring span { position: relative; z-index: 1; }
+
+    .question-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 1.25rem;
+      padding: 1rem 1.1rem;
+      color: #f9fbff;
+      font-weight: 600;
+      font-size: clamp(1rem, 1vw + 0.75rem, 1.2rem);
+      min-height: 96px;
+      display: flex;
+      align-items: center;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+      align-content: start;
+    }
+
+    .answer-card {
+      min-height: 122px;
+      background: linear-gradient(180deg, rgba(26,110,255,0.92), rgba(10,44,138,0.92));
+      border: 2px solid rgba(255,255,255,0.22);
+      border-radius: 1.1rem;
+      padding: 0.95rem 1rem;
+      display: grid;
+      gap: 0.9rem;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .answer-card.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255, 214, 76, 0.16); }
+    .answer-card.correct { background: linear-gradient(180deg, rgba(53, 184, 90, 0.95), rgba(15, 101, 44, 0.95)); }
+    .answer-card.wrong { background: linear-gradient(180deg, rgba(238, 91, 116, 0.95), rgba(140, 24, 40, 0.95)); }
+
+    .answer-card .letter {
+      width: 2.3rem;
+      height: 2.3rem;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.18);
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .answer-text { font-size: 1.1rem; font-weight: 700; }
+
+    .answer-teams {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      min-height: 2rem;
+    }
+
+    .team-pill {
+      display: inline-flex;
+      align-items: center;      
+      gap: 0.35rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.16);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .question-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .hint-text {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      max-width: 50ch;
+    }
+
+    .race-inner {
+      height: 100%;
+      padding: clamp(0.9rem, 2vw, 1.2rem);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: var(--space-4);
+      min-height: 0;
+    }
+
+    .race-title {
+      margin: 0;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+    }
+
+    .candy-goal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      font-size: var(--text-sm);
+      color: var(--muted);
+    }
+
+    .goal-icon { font-size: 2rem; filter: drop-shadow(0 0 16px rgba(255, 214, 76, 0.35)); }
+
+    .race-track {
+      position: relative;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 1.2rem;
+      padding: 0 0.9rem 0.9rem 0.9rem;
+      display: grid;
+      grid-template-columns: repeat(var(--team-count, 4), minmax(0, 1fr));
+      width: 100%;
+      gap: 0.7rem;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .lane {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .goal-cell,
+    .step-cell,
+    .start-cell {
+      flex: 1 1 0;
+      border-radius: 0.9rem;
+      border: 1px solid rgba(255,255,255,0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .goal-cell {
+      background: linear-gradient(180deg, rgba(255,221,123,0.94), rgba(255,183,3,0.92));
+      color: #04205e;
+      font-size: 1.9rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+
+    .step-cell {
+      color: rgba(255,255,255,0.35);
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+    }
+
+    .step-cell.active {
+      background: linear-gradient(180deg, rgba(126,198,255,0.45), rgba(255,255,255,0.08));
+      color: white;
+      border-color: rgba(255,214,76,0.58);
+      box-shadow: inset 0 0 0 2px rgba(255,214,76,0.16);
+    }
+
+    .start-cell {
+      background: rgba(9,22,67,0.82);
+    }
+
+    .lane-team {
+      text-align: center;
+      display: grid;
+      gap: 0.25rem;
+      justify-items: center;
+    }
+
+    .animal {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-size: 2rem;
+      background: rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: 0 10px 24px rgba(3, 12, 39, 0.25);
+    }
+
+    .animal.move {
+      animation: hop 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes hop {
+      0% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(-12px) scale(1.08); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .finish-title { 
+      font-size: clamp(4rem, 14vw, 8rem); 
+      position: relative; 
+      z-index: 10;
+      text-shadow: 0 0 40px rgba(255, 214, 76, 0.5);
+    }
+
+    .podium-wrap {
+      width: min(980px, 100%);
+      display: grid;
+      gap: var(--space-6);
+      justify-items: center;
+    }
+
+    .winner-label {
+      font-size: var(--text-xl);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .winner-name {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      color: #fff8b9;
+      text-transform: uppercase;
+      text-align: center;
+      animation: shakePop 0.8s ease both;
+    }
+
+    .podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: var(--space-4);
+      width: 100%;
+    }
+
+    .podium-slot {
+      width: clamp(100px, 18vw, 160px);
+      display: grid;
+      justify-items: center;
+      gap: 0.6rem;
+    }
+
+    .podium-top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .podium-box {
+      width: 100%;
+      border-radius: 1rem 1rem 0 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.08));
+      border: 2px solid rgba(255,255,255,0.16);
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 3.5rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .podium-slot.first .podium-box { 
+      height: 240px; 
+      background: linear-gradient(180deg, #ffe17a, #f2b707); 
+      box-shadow: 0 0 40px rgba(255, 214, 76, 0.3); 
+      color: rgba(6, 36, 98, 0.4);
+    }
+    
+    .podium-slot.second .podium-box { height: 160px; }
+    .podium-slot.third .podium-box { height: 110px; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      .app { padding: 0.5rem; }
+      .tv-shell { height: calc(100vh - 1rem); }
+      .game-layout, .setup-grid { grid-template-columns: 1fr; }
+      .answers-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="tv-shell">
+      
+      <!-- Loading Screen -->
+      <section class="screen loading-screen active enter" id="loadingScreen">
+        <div class="logo-row"><span class="logo-mark"></span><span>Question pour un Notion</span></div>
+        <h1 class="hero-title">Prêt à devenir un champion</h1>
+        <button class="primary-btn" id="startSetupBtn">Lancer la partie</button>
+      </section>
+      
+      <!-- Setup Screen -->
+      <section class="screen setup-screen" id="setupScreen">
+        <div class="setup-panel">
+          <div class="logo-row"><span class="logo-mark"></span><span>Configuration de la partie</span></div>
+          <div class="setup-grid">
+            <aside class="setup-card">
+              <h2>Équipes</h2>
+              <p>Choisissez le nombre exact d'équipe</p>
+              <div class="count-grid" id="teamCountGrid"></div>
+              <div style="height: 1rem"></div>
+              <button class="primary-btn" id="beginQuizBtn">Valider et démarrer</button>
+            </aside>
+            <div class="setup-card">
+              <h2>Identité des groupes</h2>
+              <div class="team-forms" id="teamForms"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Countdown Screen -->
+      <section class="screen countdown-screen" id="countdownScreen">
+        <div class="logo-row"><span class="logo-mark"></span><span>Mise en place</span></div>
+        <div class="count-value" id="countValue">3</div>
+        <p class="hero-subtitle">Les équipes se préparent. Le quiz démarre dès que le compte à rebours se termine.</p>
+      </section>
+      
+      <!-- Game Screen -->
+      <section class="screen game-screen" id="gameScreen">
+        <div class="top-bar">
+          <div class="top-meta">
+            <div class="logo-row"><span class="logo-mark"></span><span>Question pour un Champion - Notion</span></div>
+            <div class="chip" id="questionChip">Question 1 / 12</div>
+            <div class="chip">Touches clavier pour attribuer les équipes: 1 à 6</div>
+          </div>
+          <div style="display:flex; gap:0.6rem; flex-wrap:wrap; justify-content:flex-end;">
+            <button class="mini-btn" id="revealBtn">Révéler la bonne réponse</button>
+            <button class="mini-btn" id="nextQuestionBtn">Question suivante</button>
+          </div>
+        </div>
+        <div class="game-layout">
+          <section class="quiz-panel">
+            <div class="quiz-inner">
+              <div class="question-head">
+                <div>
+                  <div class="chip" id="questionCategory">Bases de Notion</div>
+                  <h2 class="question-title" id="questionTitle"></h2>
+                </div>
+                <div class="timer-ring" id="timerRing" style="--progress:100"><span id="timerValue">15</span></div>
+              </div>
+              <div class="question-card" id="questionText"></div>
+              <div class="answers-grid" id="answersGrid"></div>
+              <div class="question-footer">
+                <div class="hint-text" id="hintText">Étape animateur : clique sur une réponse, puis utilise les touches 1 à 6 pour indiquer les équipes qui ont choisi cette réponse.</div>
+                <button class="mini-btn" id="smallNextQuestionBtn">Question suivante</button>
+              </div>
+            </div>
+          </section>
+          <aside class="race-panel">
+            <div class="race-inner">
+              <h2 class="race-title">Course des équipes</h2>
+              <div class="candy-goal"><span class="goal-icon">🍬</span><span>Le bonbon marque l'arrivée</span></div>
+              <div class="race-track" id="raceTrack"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      
+      <!-- Finish and Podium Screens -->
+      <section class="screen finish-screen" id="finishScreen">
+        <canvas id="fireworksCanvas" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+        <div class="finish-title">FIN</div>
+      </section>
+      <section class="screen finish-screen" id="podiumScreen">
+        <div class="podium-wrap">
+          <div class="winner-label">Le gagnant est</div>
+          <div class="podium" id="podium"></div>
+          <div class="winner-name" id="winnerName"></div>
+          <div style="height: 1rem"></div>
+          <button class="primary-btn" id="restartBtn">Rejouer</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const animalIcons = ['🦊','🐼','🦁','🐯','🐸','🦉','🐻','🐨','🐺','🐵','🐧','🦄'];
+    
+    const questions = [
+      {
+        category: 'Général',
+        question: "À quoi sert principalement Notion ?",
+        answers: [
+          "Retoucher des photos",
+          "Envoyer des emails marketing",
+          "Créer et organiser des pages, notes et bases de données",
+          "Monter des vidéos"
+        ],
+        correct: 2
+      },
+      {
+        category: 'Les Blocs',
+        question: "Dans Notion, un paragraphe, un titre ou une image s'appelle...",
+        answers: [
+          "Un widget",
+          "Un bloc",
+          "Une carte",
+          "Un module"
+        ],
+        correct: 1
+      },
+      {
+        category: 'Raccourcis',
+        question: "Quel raccourci permet d'insérer rapidement un bloc dans Notion ?",
+        answers: [
+          "+",
+          "@",
+          "#",
+          "/"
+        ],
+        correct: 3
+      },
+      {
+        category: 'Bases de données',
+        question: "Quelle est la première étape pour créer un suivi de tâches ?",
+        answers: [
+          "Créer une base de données",
+          "Choisir une vue Kanban",
+          "Inviter ses coéquipiers",
+          "Installer un template"
+        ],
+        correct: 0
+      },
+      {
+        category: 'Bases de données',
+        question: "Dans une vue Kanban, les colonnes représentent...",
+        answers: [
+          "Les dates de création",
+          "Les pages liées à la base",
+          "Les membres assignés",
+          "Les valeurs d'une propriété Statut"
+        ],
+        correct: 3
+      },
+      {
+        category: 'Propriétés',
+        question: "Pour indiquer si un contact est Client ou Prospect, on utilise...",
+        answers: [
+          "Case à cocher",
+          "Sélection",
+          "Texte",
+          "Nombre"
+        ],
+        correct: 1
+      },
+      {
+        category: 'Propriétés',
+        question: "Pour associer un chargé de clientèle à une fiche client, on utilise...",
+        answers: [
+          "Formule",
+          "Texte",
+          "Personne",
+          "Sélection"
+        ],
+        correct: 2
+      },
+      {
+        category: 'Propriétés',
+        question: "Pour enregistrer un montant et faire des calculs dessus, on utilise...",
+        answers: [
+          "Date",
+          "Texte",
+          "Nombre",
+          "Formule"
+        ],
+        correct: 2
+      },
+      {
+        category: 'Filtres',
+        question: "Pour filtrer les dépenses supérieures à 500€, on utilise...",
+        answers: [
+          "Un filtre Nombre supérieur à 500",
+          "Un tri décroissant",
+          "Une vue Kanban",
+          "Une formule dans une nouvelle propriété"
+        ],
+        correct: 0
+      },
+      {
+        category: 'Boutons',
+        question: "À quoi sert un bouton dans Notion ?",
+        answers: [
+          "Changer l'icône d'une base de données",
+          "Créer un lien vers une page externe",
+          "Modifier la police d'une page",
+          "Déclencher une ou plusieurs actions automatiques"
+        ],
+        correct: 3
+      },
+      {
+        category: 'Boutons',
+        question: "Quelle action peut être liée à un bouton Notion ?",
+        answers: [
+          "Ajouter une entrée dans une base de données",
+          "Envoyer une notification SMS",
+          "Modifier les paramètres du compte",
+          "Archiver automatiquement une page"
+        ],
+        correct: 0
+      },
+      {
+        category: 'Personnalisation',
+        question: "Comment ajouter une image de couverture en haut d'une page ?",
+        answers: [
+          "En modifiant les propriétés de la base",
+          "En cliquant sur Ajouter une couverture en haut de la page",
+          "En activant le mode présentation",
+          "En insérant un bloc image en premier"
+        ],
+        correct: 1
+      }
+    ];
+
+    const state = {
+      teamCount: 2,
+      teams: [],
+      currentQuestion: 0,
+      timer: 15,
+      timerId: null,
+      selectedAnswer: null,
+      revealed: false,
+      countdownIndex: 0,
+      activeScreen: 'loading'
+    };
+
+    const els = {
+      loadingScreen: document.getElementById('loadingScreen'),
+      setupScreen: document.getElementById('setupScreen'),
+      countdownScreen: document.getElementById('countdownScreen'),
+      gameScreen: document.getElementById('gameScreen'),
+      finishScreen: document.getElementById('finishScreen'),
+      podiumScreen: document.getElementById('podiumScreen'),
+      startSetupBtn: document.getElementById('startSetupBtn'),
+      beginQuizBtn: document.getElementById('beginQuizBtn'),
+      teamCountGrid: document.getElementById('teamCountGrid'),
+      teamForms: document.getElementById('teamForms'),
+      countValue: document.getElementById('countValue'),
+      questionChip: document.getElementById('questionChip'),
+      questionCategory: document.getElementById('questionCategory'),
+      questionTitle: document.getElementById('questionTitle'),
+      questionText: document.getElementById('questionText'),
+      answersGrid: document.getElementById('answersGrid'),
+      timerValue: document.getElementById('timerValue'),
+      timerRing: document.getElementById('timerRing'),
+      raceTrack: document.getElementById('raceTrack'),
+      revealBtn: document.getElementById('revealBtn'),
+      nextQuestionBtn: document.getElementById('nextQuestionBtn'),
+      smallNextQuestionBtn: document.getElementById('smallNextQuestionBtn'),
+      winnerName: document.getElementById('winnerName'),
+      podium: document.getElementById('podium'),
+      restartBtn: document.getElementById('restartBtn')
+    };
+
+    function showScreen(name) {
+      return new Promise(resolve => {
+        const map = {
+          loading: els.loadingScreen,
+          setup: els.setupScreen,
+          countdown: els.countdownScreen,
+          game: els.gameScreen,
+          finish: els.finishScreen,
+          podium: els.podiumScreen
+        };
+        
+        const nextScreen = map[name];
+        if (!nextScreen) {
+          resolve();
+          return;
+        }
+        
+        if (state.activeScreen === name) {
+          resolve();
+          return;
+        }
+        
+        state.activeScreen = name;
+
+        const currentScreens = document.querySelectorAll('.screen.active');
+        let hasOutgoing = false;
+
+        currentScreens.forEach(screen => {
+          if (screen === nextScreen) return;
+          hasOutgoing = true;
+          screen.classList.remove('enter');
+          screen.classList.add('exit');
+          
+          setTimeout(() => {
+            screen.classList.remove('active', 'exit');
+          }, 250);
+        });
+
+        if (hasOutgoing) {
+          setTimeout(() => {
+            nextScreen.classList.add('active');
+            void nextScreen.offsetWidth; // Force reflow
+            nextScreen.classList.add('enter');
+            resolve();
+          }, 200);
+        } else {
+          nextScreen.classList.add('active');
+          void nextScreen.offsetWidth;
+          nextScreen.classList.add('enter');
+          resolve();
+        }
+      });
+    }
+
+    function renderTeamCountButtons() {
+      els.teamCountGrid.innerHTML = '';
+      for (let i = 1; i <= 6; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'team-count-btn' + (i === state.teamCount ? ' active' : '');
+        btn.textContent = i;
+        btn.type = 'button';
+        btn.addEventListener('click', () => {
+          state.teamCount = i;
+          ensureTeams();
+          renderTeamCountButtons();
+          renderTeamForms();
+        });
+        els.teamCountGrid.appendChild(btn);
+      }
+    }
+
+    function ensureTeams() {
+      const current = state.teams.slice(0, state.teamCount);
+      while (current.length < state.teamCount) {
+        const icon = animalIcons.find(a => !current.some(t => t.icon === a)) || animalIcons[current.length];
+        current.push({
+          id: current.length + 1,
+          name: `Équipe ${current.length + 1}`,
+          icon,
+          score: 0,
+          answered: []
+        });
+      }
+      state.teams = current.map((team, index) => ({ ...team, id: index + 1, score: team.score || 0, answered: team.answered || [] }));
+    }
+
+    function renderTeamForms() {
+      els.teamForms.innerHTML = '';
+      state.teams.forEach((team, index) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'team-form';
+        wrap.innerHTML = `
+          <div class="field">
+            <label>Nom de l'équipe ${index + 1}</label>
+            <input type="text" maxlength="20" value="${team.name}">
+          </div>
+          <div class="icon-grid"></div>
+        `;
+        
+        const input = wrap.querySelector('input');
+        input.addEventListener('input', (e) => {
+          team.name = e.target.value.trim() || `Équipe ${index + 1}`;
+          renderRace();
+        });
+        
+        const grid = wrap.querySelector('.icon-grid');
+        animalIcons.forEach(icon => {
+          const tile = document.createElement('button');
+          tile.type = 'button';
+          tile.className = 'icon-tile' + (team.icon === icon ? ' selected' : '');
+          tile.textContent = icon;
+          tile.addEventListener('click', () => {
+            const otherTeamWithIcon = state.teams.find(t => t.id !== team.id && t.icon === icon);
+            if (otherTeamWithIcon) otherTeamWithIcon.icon = team.icon;
+            team.icon = icon;
+            renderTeamForms();
+            renderRace();
+          });
+          grid.appendChild(tile);
+        });
+        els.teamForms.appendChild(wrap);
+      });
+    }
+
+    function resetScores() {
+      state.teams.forEach(team => {
+        team.score = 0;
+        team.answered = [];
+      });
+    }
+
+    function startCountdown() {
+      showScreen('countdown');
+      const steps = ['3', '2', '1', 'GO'];
+      let index = 0;
+      
+      function tick() {
+        const value = steps[index];
+        
+        els.countValue.classList.remove('animate-shake');
+        void els.countValue.offsetWidth;
+        
+        if (value === 'GO') {
+          els.countValue.innerHTML = `
+            <span style="position:relative; z-index:2;">GO</span>
+            <span class="star" style="top: -10%; left: -20%;">✦</span>
+            <span class="star" style="top: 20%; right: -25%;">✦</span>
+            <span class="star" style="bottom: -10%; left: 15%;">✦</span>
+            <span class="star" style="bottom: 10%; right: -15%;">✦</span>
+            <span class="star" style="top: -20%; right: 15%;">✦</span>
+            <span class="star" style="bottom: -20%; left: -10%;">✦</span>
+          `;
+          els.countValue.className = 'count-value count-go animate-shake';
+        } else {
+          els.countValue.textContent = value;
+          els.countValue.className = 'count-value animate-shake';
+        }
+        
+        index += 1;
+        if (index < steps.length) {
+          setTimeout(tick, 820);
+        } else {
+          setTimeout(async () => {
+            state.currentQuestion = 0;
+            await showScreen('game');
+            renderQuestion();
+          }, 900);
+        }
+      }
+      tick();
+    }
+
+    function startTimer() {
+      clearInterval(state.timerId);
+      state.timer = 15;
+      updateTimerUI();
+      state.timerId = setInterval(() => {
+        state.timer -= 1;
+        if (state.timer <= 0) {
+          state.timer = 0;
+          clearInterval(state.timerId);
+        }
+        updateTimerUI();
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      els.timerValue.textContent = state.timer;
+      const pct = (state.timer / 15) * 100;
+      els.timerRing.style.setProperty('--progress', pct);
+    }
+
+    function renderQuestion() {
+      const item = questions[state.currentQuestion];
+      state.selectedAnswer = null;
+      state.revealed = false;
+      state.teams.forEach(team => team.answered = []);
+      
+      els.nextQuestionBtn.style.display = '';
+      els.smallNextQuestionBtn.style.display = '';
+      
+      els.questionChip.textContent = `Question ${state.currentQuestion + 1} / ${questions.length}`;
+      if (els.questionCategory) {
+        els.questionCategory.textContent = item.category;
+      }
+      els.questionTitle.textContent = item.category;
+      els.questionText.textContent = item.question;
+      els.answersGrid.innerHTML = '';
+      
+      item.answers.forEach((answer, index) => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'answer-card';
+        card.dataset.index = index;
+        card.innerHTML = `
+          <div class="letter">${String.fromCharCode(65 + index)}</div>
+          <div class="answer-text">${answer}</div>
+          <div class="answer-teams"></div>
+        `;
+        card.addEventListener('click', () => selectAnswer(index));
+        els.answersGrid.appendChild(card);
+      });
+      
+      startTimer();
+      renderRace();
+    }
+
+    function selectAnswer(index) {
+      if (state.revealed) return;
+      state.selectedAnswer = index;
+      [...els.answersGrid.children].forEach((card, i) => {
+        card.classList.toggle('selected', i === index);
+      });
+    }
+
+    function assignTeamToSelectedAnswer(teamIndex) {
+      if (state.selectedAnswer === null || state.revealed) return;
+      const team = state.teams[teamIndex];
+      if (!team) return;
+      const already = team.answered.includes(state.selectedAnswer);
+      team.answered = already ? [] : [state.selectedAnswer];
+      renderAnswerAssignments();
+    }
+
+    function renderAnswerAssignments() {
+      [...els.answersGrid.children].forEach((card, answerIndex) => {
+        const slot = card.querySelector('.answer-teams');
+        slot.innerHTML = '';
+        state.teams.filter(team => team.answered.includes(answerIndex)).forEach(team => {
+          const pill = document.createElement('div');
+          pill.className = 'team-pill';
+          pill.textContent = `${team.icon} ${team.name}`;
+          slot.appendChild(pill);
+        });
+      });
+    }
+
+    function revealAnswer() {
+      if (state.selectedAnswer === null || state.revealed) return;
+      state.revealed = true;
+      clearInterval(state.timerId);
+      
+      const correct = questions[state.currentQuestion].correct;
+      [...els.answersGrid.children].forEach((card, index) => {
+        if (index === correct) card.classList.add('correct');
+        if (index === state.selectedAnswer && index !== correct) card.classList.add('wrong');
+      });
+      
+      if (state.selectedAnswer === correct) {
+        state.teams.filter(team => team.answered.includes(correct)).forEach(team => {
+          if (team.score < 3) team.score += 1;
+        });
+      }
+      
+      renderRace(true);
+      
+      // Check for immediate win (score >= 3)
+      const hasWinner = state.teams.some(team => team.score >= 3);
+      if (hasWinner) {
+        els.nextQuestionBtn.style.display = 'none';
+        els.smallNextQuestionBtn.style.display = 'none';
+        
+        setTimeout(() => {
+          showFinishThenPodium();
+        }, 1200); // Délai pour laisser finir l'animation de course
+      }
+    }
+
+    function renderRace(animate = false) {
+      els.raceTrack.style.setProperty('--team-count', state.teamCount);
+      els.raceTrack.innerHTML = '';
+      
+      state.teams.forEach(team => {
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        const steps = [3, 2, 1].map(level => `<div class="step-cell ${team.score >= level ? 'active' : ''}">${level}</div>`).join('');
+        lane.innerHTML = `
+          <div class="goal-cell">🍬</div>
+          ${steps}
+          <div class="start-cell">
+            <div class="lane-team">
+              <div class="animal ${animate ? 'move' : ''}">${team.icon}</div>
+            </div>
+          </div>
+        `;
+        els.raceTrack.appendChild(lane);
+      });
+    }
+
+    function nextQuestion() {
+      if (state.teams.some(team => team.score >= 3)) return; // Bloquer si fin de partie atteinte
+      clearInterval(state.timerId);
+      if (state.currentQuestion >= questions.length - 1) {
+        showFinishThenPodium();
+        return;
+      }
+      state.currentQuestion += 1;
+      renderQuestion();
+    }
+
+    // -- Fireworks System --
+    let fwInterval;
+    let fwAnim;
+
+    function startFireworks() {
+      const canvas = document.getElementById('fireworksCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      const particles = [];
+
+      function createExplosion(x, y) {
+        const count = Math.random() * 20 + 30; // 30-50 particles
+        const baseHue = Math.random() * 360;
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = Math.random() * 8 + 2;
+          particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 1,
+            color: `hsl(${baseHue + (Math.random() * 40 - 20)}, 100%, 65%)`,
+            size: Math.random() * 3 + 2
+          });
+        }
+      }
+
+      // Initial explosions
+      createExplosion(canvas.width * 0.3, canvas.height * 0.4);
+      createExplosion(canvas.width * 0.7, canvas.height * 0.5);
+
+      fwInterval = setInterval(() => {
+        createExplosion(
+          Math.random() * canvas.width * 0.8 + canvas.width * 0.1, 
+          Math.random() * canvas.height * 0.6 + canvas.height * 0.1
+        );
+      }, 400);
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.15; // Gravity
+          p.life -= 0.015; // Fade out
+          
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        fwAnim = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    function stopFireworks() {
+      clearInterval(fwInterval);
+      cancelAnimationFrame(fwAnim);
+      const canvas = document.getElementById('fireworksCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    // -----------------------
+
+    async function showFinishThenPodium() {
+      await showScreen('finish');
+      startFireworks();
+      
+      // Temps transitoire écran FIN (2.5 secondes)
+      setTimeout(async () => {
+        stopFireworks();
+        buildPodium();
+        await showScreen('podium');
+      }, 2500);
+    }
+
+    function buildPodium() {
+      const ranking = [...state.teams].sort((a, b) => b.score - a.score || a.id - b.id);
+      
+      // Remplissage du nom du gagnant
+      const winner = ranking[0];
+      els.winnerName.textContent = winner.name;
+      
+      // On prend uniquement le top 3
+      const order = [ranking[1], ranking[0], ranking[2]].filter(Boolean);
+      const classMap = ['second', 'first', 'third'];
+      const placeMap = [2, 1, 3];
+      
+      els.podium.innerHTML = '';
+      order.forEach((team, idx) => {
+        const slot = document.createElement('div');
+        slot.className = `podium-slot ${classMap[idx]}`;
+        // L'emoji et le bloc sont dans deux divs séparées, avec le numéro de place
+        slot.innerHTML = `
+          <div class="podium-top">
+            <div class="animal" style="width:76px;height:76px;font-size:2.7rem;">${team.icon}</div>
+          </div>
+          <div class="podium-box">${placeMap[idx]}</div>
+        `;
+        els.podium.appendChild(slot);
+      });
+    }
+
+    function beginGame() {
+      const inputs = [...els.teamForms.querySelectorAll('input')];
+      inputs.forEach((input, index) => {
+        state.teams[index].name = input.value.trim() || `Équipe ${index + 1}`;
+      });
+      resetScores();
+      startCountdown();
+    }
+
+    function init() {
+      ensureTeams();
+      renderTeamCountButtons();
+      renderTeamForms();
+      renderRace();
+      
+      els.startSetupBtn.addEventListener('click', () => showScreen('setup'));
+      els.beginQuizBtn.addEventListener('click', beginGame);
+      els.revealBtn.addEventListener('click', revealAnswer);
+      els.nextQuestionBtn.addEventListener('click', nextQuestion);
+      els.smallNextQuestionBtn.addEventListener('click', nextQuestion);
+      
+      els.restartBtn.addEventListener('click', () => {
+        clearInterval(state.timerId);
+        state.currentQuestion = 0;
+        ensureTeams();
+        renderTeamForms();
+        renderRace();
+        showScreen('setup');
+      });
+      
+      document.addEventListener('keydown', (event) => {
+        if (state.activeScreen !== 'game') return;
+        const num = Number(event.key);
+        if (num >= 1 && num <= 6) {
+          assignTeamToSelectedAnswer(num - 1);
+        }
+        if (event.key.toLowerCase() === 'n') nextQuestion();
+        if (event.key.toLowerCase() === 'r') revealAnswer();
+        if (['a','b','c','d'].includes(event.key.toLowerCase())) {
+          selectAnswer(event.key.toLowerCase().charCodeAt(0) - 97);
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
